@@ -11,6 +11,7 @@ import {
   Ticket,
   LogOut,
 } from "lucide-react";
+import { useAuthStore } from "@/store/auth";
 
 const menus = [
   { title: "Dashboard", icon: LayoutDashboard, path: "/" },
@@ -23,11 +24,10 @@ const menus = [
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { logout, user } = useAuthStore();
 
-  const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("userRole");
+  const handleLogout = async () => {
+    await logout();
     router.push("/login");
   };
 
@@ -96,7 +96,9 @@ export default function Sidebar() {
                 className="w-12 h-12 rounded-full border-2 border-white/30"
               />
               <div>
-                <h2 className="text-white font-bold text-base">Admin</h2>
+                <h2 className="text-white font-bold text-base">
+                  {user?.email?.split('@')[0] || 'Admin'}
+                </h2>
                 <p className="text-violet-200 text-xs">Administrator</p>
               </div>
             </div>

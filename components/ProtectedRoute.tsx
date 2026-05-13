@@ -3,26 +3,34 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { isAuthenticated, checkAuth } = useAuthStore();
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Check authentication status
-    const auth = localStorage.getItem("isAuthenticated");
-    
-    if (auth !== "true" && pathname !== "/login") {
-      router.push("/login");
-    } else if (auth === "true" && pathname === "/login") {
-      router.push("/");
-    }
-    
-    setIsAuthenticated(auth === "true");
-  }, [pathname, router]);
+    const verifyAuth = async () => {
+      await checkAuth();
+      setIsChecking(false);
+    };
 
-  if (isAuthenticated === null && pathname !== "/login") {
+    verifyAuth();
+  }, [checkAuth]);
+
+  useEffect(() => {
+    if (!isChecking) {
+      if (!isAuthenticated && pathname !== "/login") {
+        router.push("/login");
+      } else if (isAuthenticated && pathname === "/login") {
+        router.push("/");
+      }
+    }
+  }, [isAuthenticated, pathname, router, isChecking]);
+
+  if (isChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f5f6fb]">
         <div className="text-center">

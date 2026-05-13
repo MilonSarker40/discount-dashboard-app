@@ -1,39 +1,43 @@
 // app/login/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, Shield, Store } from "lucide-react";
+import { useAuthStore } from "@/store/auth";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login, isLoading, isAuthenticated, checkAuth } = useAuthStore();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  // Check if already authenticated
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
-    // Simulate API call - In production, replace with actual authentication
-    setTimeout(() => {
-      // Demo credentials: admin@discountapp.com / admin123
-      if (email === "admin@discountapp.com" && password === "admin123") {
-        // Store auth state
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("userEmail", email);
-        localStorage.setItem("userRole", "admin");
-        
-        // Redirect to dashboard
-        router.push("/");
-      } else {
-        setError("Invalid email or password. Try: admin@discountapp.com / admin123");
-      }
-      setLoading(false);
-    }, 1000);
+    const { error: authError } = await login(email, password);
+    
+    if (authError) {
+      setError(authError);
+    } else {
+      router.push("/");
+    }
   };
 
   return (
@@ -80,8 +84,9 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-11 pr-4 py-3 rounded-xl border border-[#e0d9ff] focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition"
-                  placeholder="admin@discountapp.com"
+                  placeholder="your@email.com"
                   required
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -98,11 +103,13 @@ export default function LoginPage() {
                   className="w-full pl-11 pr-12 py-3 rounded-xl border border-[#e0d9ff] focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition"
                   placeholder="••••••••"
                   required
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#8a86b3] hover:text-violet-600"
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -123,10 +130,10 @@ export default function LoginPage() {
             {/* Login Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={isLoading}
               className="w-full bg-gradient-to-r from-violet-600 to-purple-700 text-white py-3 rounded-xl font-semibold hover:from-violet-700 hover:to-purple-800 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {loading ? (
+              {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   Signing in...
@@ -139,12 +146,12 @@ export default function LoginPage() {
               )}
             </button>
 
-            {/* Demo Credentials */}
+            {/* Demo Instructions */}
             <div className="mt-6 p-4 bg-violet-50 rounded-xl border border-violet-100">
-              <p className="text-xs text-violet-700 font-semibold mb-2">Demo Credentials:</p>
+              <p className="text-xs text-violet-700 font-semibold mb-2">Getting Started:</p>
               <div className="space-y-1 text-sm text-violet-600">
-                <p>📧 Email: admin@discountapp.com</p>
-                <p>🔑 Password: admin123</p>
+                <p>📧 Sign up with your email in Supabase dashboard</p>
+                <p>🔑 Use your registered email and password</p>
               </div>
             </div>
           </form>
