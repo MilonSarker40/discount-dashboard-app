@@ -41,7 +41,7 @@ export default function StatCard({ title, value, change, color, icon }: StatCard
             </p>
           </div>
         </div>
-        <div className="text-violet-300 text-3xl">📈</div>
+        <div className="text-violet-300 text-2xl">📈</div>
       </div>
     </div>
   );

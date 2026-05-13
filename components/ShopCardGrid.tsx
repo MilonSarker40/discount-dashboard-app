@@ -1,26 +1,39 @@
-// components/ShopCardGrid.tsx
-const shops = [
-  { name: "Burger King", owner: "Nayeem", location: "Dhaka, Bangladesh" },
-  { name: "Coffee House", owner: "Jihad", location: "Mirpur, Dhaka" },
-];
+// components/ShopCardGrid.tsx (Updated with delete)
+"use client";
+
+import { Trash2, Edit } from "lucide-react";
+import { useDataStore } from "@/store/dataStore";
 
 export default function ShopCardGrid() {
+  const shops = useDataStore((state) => state.shops);
+  const deleteShop = useDataStore((state) => state.deleteShop);
+
   return (
     <div className="glass-card p-6">
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-2xl font-bold text-[#1d1b4b]">Shop Details</h1>
+        <h2 className="text-2xl font-bold text-[#1d1b4b]">Shop Details</h2>
         <button className="text-violet-600 text-sm font-semibold">View Details →</button>
       </div>
       <div className="space-y-4">
-        {shops.map((shop, idx) => (
-          <div key={idx} className="p-5 rounded-2xl bg-[#faf9ff] border border-[#f0ebff] flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-black text-[#1d1b4b]">{shop.name}</h2>
-              <p className="text-violet-500 mt-1 text-sm">Owner: {shop.owner}</p>
-              <p className="text-violet-400 text-xs">{shop.location}</p>
-            </div>
-            <div className="w-14 h-14 rounded-2xl bg-violet-100 flex items-center justify-center text-2xl">
-              🍔
+        {shops.slice(0, 3).map((shop) => (
+          <div key={shop.id} className="p-5 rounded-2xl bg-[#faf9ff] border border-[#f0ebff]">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <h3 className="text-base font-black text-[#1d1b4b]">{shop.name}</h3>
+                <p className="text-violet-500 mt-1 text-sm">Owner: {shop.owner}</p>
+                <p className="text-violet-400 text-xs">{shop.location}</p>
+              </div>
+              <div className="flex gap-2">
+                <button className="p-2 rounded-lg hover:bg-violet-50 text-violet-600">
+                  <Edit size={16} />
+                </button>
+                <button 
+                  onClick={() => deleteShop(shop.id)}
+                  className="p-2 rounded-lg hover:bg-red-50 text-red-600"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
           </div>
         ))}

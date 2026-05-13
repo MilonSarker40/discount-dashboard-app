@@ -2,15 +2,16 @@
 const freelancers = [
   { name: "Sabbir", role: "UI/UX Designer", status: "Pending" },
   { name: "Tamim", role: "Web Developer", status: "Approved" },
+  { name: "Tamim", role: "Web Developer", status: "Approved" },
 ];
 
 export default function FreelancerApproval() {
   return (
     <div className="glass-card p-6">
-      <h1 className="text-2xl font-bold text-[#1d1b4b] mb-5">Freelancer Approval</h1>
+      <h2 className="text-2xl font-bold text-[#1d1b4b] mb-5">Freelancer Approval</h2>
       <div className="space-y-5">
         {freelancers.map((freelancer, idx) => (
-          <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-[#faf9ff] border border-[#f0ebff]">
+          <div key={idx} className="flex items-center justify-between p-5 rounded-2xl bg-[#faf9ff] border border-[#f0ebff]">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold">
                 {freelancer.name.charAt(0)}

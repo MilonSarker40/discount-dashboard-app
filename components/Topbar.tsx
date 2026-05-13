@@ -10,10 +10,10 @@ export default function Topbar() {
   return (
     <div className="flex items-center justify-between mb-8">
       <div>
-        <h1 className="text-3xl leading-none font-black text-[#1d1b4b] tracking-tight">
+        <h2 className="text-2xl leading-none font-black text-[#1d1b4b] tracking-tight">
           Dashboard
-        </h1>
-        <p className="text-[#6f6c99] mt-2 text-sm">Welcome back, Admin! 👋</p>
+        </h2>
+        <p className="text-[#6f6c99] mt-2 text-xs">Welcome back, Admin! 👋</p>
       </div>
 
       <div className="flex items-center gap-5">

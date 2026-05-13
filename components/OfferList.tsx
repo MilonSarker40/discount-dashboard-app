@@ -29,7 +29,7 @@ export default function OfferList() {
           <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
             <Tag size={20} className="text-violet-600" />
           </div>
-          <h1 className="section-title text-xl">Offer List</h1>
+          <h1 className="section-title text-2xl">Offer List</h1>
         </div>
         <button className="px-5 py-2.5 rounded-xl border border-[#ece8ff] text-violet-700 font-semibold text-sm hover:bg-violet-50 transition">
           View All
@@ -46,11 +46,11 @@ export default function OfferList() {
               <img
                 src={offer.image}
                 alt={offer.title}
-                className="w-[100px] h-[100px] rounded-2xl object-cover"
+                className="w-[90px] h-[90px] rounded-2xl object-cover"
               />
               <div>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <h2 className="text-2xl font-black text-[#1d1b4b]">{offer.title}</h2>
+                  <h2 className="text-base font-bold text-[#1d1b4b]">{offer.title}</h2>
                   <span
                     className={`text-xs font-bold px-3 py-1.5 rounded-full ${
                       offer.status === "Active" ? "badge-active" : "badge-pending"
@@ -59,7 +59,7 @@ export default function OfferList() {
                     {offer.status}
                   </span>
                 </div>
-                <p className="text-[#7e7aa7] text-lg mt-1">{offer.shop}</p>
+                <p className="text-[#7e7aa7] text-sm mt-1">{offer.shop}</p>
                 <div className="flex items-center gap-2 mt-2 text-[#9b97bd]">
                   <CalendarDays size={16} />
                   <span className="text-sm">{offer.period}</span>
@@ -67,8 +67,8 @@ export default function OfferList() {
               </div>
             </div>
             <div className="text-right">
-              <h2 className="text-4xl font-black text-[#1d1b4b]">{offer.redemptions}</h2>
-              <p className="text-[#9b97bd] font-medium">Redemptions</p>
+              <h2 className="text-2xl font-bold text-[#1d1b4b]">{offer.redemptions}</h2>
+              <p className="text-[#9b97bd] text-sm font-medium">Redemptions</p>
             </div>
           </div>
         ))}
