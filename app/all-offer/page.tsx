@@ -1,161 +1,467 @@
-// app/all-offer/page.tsx
 "use client";
+
+import { useEffect, useState } from "react";
 
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
-import { Gift, Calendar, Store, Eye, Edit, Trash2, Plus } from "lucide-react";
-import { useState } from "react";
-import { useDataStore } from "@/store/dataStore";
+
 import AddOfferModal from "@/components/Modals/AddOfferModal";
 
+import {
+  Calendar,
+  Eye,
+  Edit,
+  Trash2,
+  Plus,
+} from "lucide-react";
 
-const offers = [
-  { id: 1, title: "50% OFF Pizza", shop: "Pizza Hut", discount: "50% OFF", code: "PIZZA50", validFrom: "May 20, 2024", validTo: "May 30, 2024", status: "Active", totalRedemptions: 120, usedCount: 78, limit: 200, type: "Percentage" },
-  { id: 2, title: "Buy 1 Get 1", shop: "KFC", discount: "BOGO", code: "KFCBOGO", validFrom: "May 18, 2024", validTo: "May 25, 2024", status: "Expired", totalRedemptions: 85, usedCount: 85, limit: 100, type: "BOGO" },
-  { id: 3, title: "Free Coffee", shop: "Coffee House", discount: "100% OFF", code: "COFFEE100", validFrom: "May 25, 2024", validTo: "June 10, 2024", status: "Active", totalRedemptions: 45, usedCount: 12, limit: 50, type: "Free Item" },
-  { id: 4, title: "20% Cashback", shop: "Burger King", discount: "20% OFF", code: "BK20", validFrom: "May 22, 2024", validTo: "June 5, 2024", status: "Active", totalRedemptions: 67, usedCount: 34, limit: 150, type: "Percentage" },
-];
+import { useOfferStore } from "@/store/offerStore";
 
 export default function AllOfferPage() {
+  const [modalOpen, setModalOpen] =
+    useState<"offer" | null>(null);
 
-   const [modalOpen, setModalOpen] = useState<"offer" | null>(null);
-   const offers = useDataStore((state) => state.offers);
+  const [searchTerm, setSearchTerm] =
+    useState("");
+
+  const [currentPage, setCurrentPage] =
+    useState(1);
+
+  const itemsPerPage = 5;
+
+  const {
+    offers,
+    fetchOffers,
+    loading,
+  } = useOfferStore();
+
+  useEffect(() => {
+    fetchOffers();
+  }, []);
+
+  /* -----------------------------
+   SEARCH FILTER
+  ----------------------------- */
+
+  const filteredOffers =
+    offers.filter(
+      (offer) =>
+        offer.name
+          ?.toLowerCase()
+          .includes(
+            searchTerm.toLowerCase()
+          ) ||
+        offer.description
+          ?.toLowerCase()
+          .includes(
+            searchTerm.toLowerCase()
+          )
+    );
+
+  /* -----------------------------
+   PAGINATION
+  ----------------------------- */
+
+  const totalPages = Math.ceil(
+    filteredOffers.length /
+      itemsPerPage
+  );
+
+  const startIndex =
+    (currentPage - 1) *
+    itemsPerPage;
+
+  const endIndex =
+    startIndex + itemsPerPage;
+
+  const paginatedOffers =
+    filteredOffers.slice(
+      startIndex,
+      endIndex
+    );
+
+  /* -----------------------------
+   LOADING
+  ----------------------------- */
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-xl font-bold">
+        Loading...
+      </div>
+    );
+  }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-[#f7f7fc]">
       <Sidebar />
+
       <main className="flex-1 p-6 lg:p-8 overflow-x-auto">
         <Topbar />
-        
+
         <div className="mt-8">
+          {/* HEADER */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-[#1d1b4b]">All Offers</h2>
-              <p className="text-[#6f6c99] mt-2">Manage and track promotional offers</p>
+              <h2 className="text-2xl font-bold text-[#1d1b4b]">
+                All Offers
+              </h2>
+
+              <p className="text-[#6f6c99] mt-2">
+                Manage and track promotional offers
+              </p>
             </div>
-            <button onClick={() => setModalOpen("offer")} className="bg-violet-700 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-violet-800 transition flex items-center gap-2">
+
+            <button
+              onClick={() =>
+                setModalOpen("offer")
+              }
+              className="bg-violet-700 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-violet-800 transition flex items-center gap-2"
+            >
               <Plus size={20} />
               Create New Offer
             </button>
           </div>
 
-          {/* Stats */}
+          {/* STATS */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            {/* Total */}
             <div className="bg-white rounded-2xl p-6 border border-[#f0ebff]">
-              <p className="text-[#7a7699]">Total Offers</p>
-              <h2 className="text-2xl font-bold text-[#1d1b4b] mt-2">85</h2>
-              <p className="text-green-500 text-sm mt-2">↑ 8 this month</p>
+              <p className="text-[#7a7699]">
+                Total Offers
+              </p>
+
+              <h2 className="text-2xl font-bold text-[#1d1b4b] mt-2">
+                {offers.length}
+              </h2>
             </div>
+
+            {/* Active */}
             <div className="bg-white rounded-2xl p-6 border border-[#f0ebff]">
-              <p className="text-[#7a7699]">Active Offers</p>
-              <h2 className="text-2xl font-bold text-[#1d1b4b] mt-2">32</h2>
-              <p className="text-blue-500 text-sm mt-2">37.6% active</p>
+              <p className="text-[#7a7699]">
+                Active Offers
+              </p>
+
+              <h2 className="text-2xl font-bold text-[#1d1b4b] mt-2">
+                {
+                  offers.filter(
+                    (offer) =>
+                      offer.is_active
+                  ).length
+                }
+              </h2>
             </div>
+
+            {/* Published */}
             <div className="bg-white rounded-2xl p-6 border border-[#f0ebff]">
-              <p className="text-[#7a7699]">Total Redemptions</p>
-              <h2 className="text-2xl font-bold text-[#1d1b4b] mt-2">1,234</h2>
-              <p className="text-purple-500 text-sm mt-2">Lifetime</p>
+              <p className="text-[#7a7699]">
+                Published Offers
+              </p>
+
+              <h2 className="text-2xl font-bold text-[#1d1b4b] mt-2">
+                {
+                  offers.filter(
+                    (offer) =>
+                      offer.is_published
+                  ).length
+                }
+              </h2>
             </div>
+
+            {/* Percentage */}
             <div className="bg-white rounded-2xl p-6 border border-[#f0ebff]">
-              <p className="text-[#7a7699]">Conversion Rate</p>
-              <h2 className="text-2xl font-bold text-[#1d1b4b] mt-2">68%</h2>
-              <p className="text-green-500 text-sm mt-2">↑ 12% vs last month</p>
+              <p className="text-[#7a7699]">
+                Percentage Offers
+              </p>
+
+              <h2 className="text-2xl font-bold text-[#1d1b4b] mt-2">
+                {
+                  offers.filter(
+                    (offer) =>
+                      offer.discount_type ===
+                      "percentage"
+                  ).length
+                }
+              </h2>
             </div>
           </div>
 
-          {/* Offers Table */}
+          {/* TABLE */}
           <div className="bg-white rounded-[32px] border border-[#f0ebff] overflow-hidden">
+            {/* SEARCH */}
             <div className="p-6 border-b border-[#f0ebff]">
-              <div className="flex items-center gap-4">
-                <input 
-                  type="text" 
-                  placeholder="Search offers by title or shop..." 
-                  className="px-5 py-3 rounded-xl border border-[#e0d9ff] flex-1 focus:outline-none focus:border-violet-500"
-                />
-                <select className="px-5 py-3 rounded-xl border border-[#e0d9ff] bg-white">
-                  <option>All Status</option>
-                  <option>Active</option>
-                  <option>Expired</option>
-                  <option>Upcoming</option>
-                </select>
-                <select className="px-5 py-3 rounded-xl border border-[#e0d9ff] bg-white">
-                  <option>All Shops</option>
-                  <option>Pizza Hut</option>
-                  <option>KFC</option>
-                  <option>Burger King</option>
-                </select>
-              </div>
+              <input
+                type="text"
+                placeholder="Search offers..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(
+                    e.target.value
+                  );
+
+                  setCurrentPage(1);
+                }}
+                className="px-5 py-3 rounded-xl border border-[#e0d9ff] w-full focus:outline-none focus:border-violet-500"
+              />
             </div>
-            
+
+            {/* TABLE */}
             <table className="w-full">
               <thead className="bg-[#faf9ff] border-b border-[#f0ebff]">
                 <tr className="text-left text-[#8a86b3]">
-                  <th className="p-6 font-semibold">Offer Details</th>
-                  <th className="p-6 font-semibold">Shop</th>
-                  <th className="p-6 font-semibold">Valid Period</th>
-                  <th className="p-6 font-semibold">Code</th>
-                  <th className="p-6 font-semibold">Redemptions</th>
-                  <th className="p-6 font-semibold">Status</th>
-                  <th className="p-6 font-semibold">Actions</th>
+                  <th className="p-6 font-semibold">
+                    Offer
+                  </th>
+
+                  <th className="p-6 font-semibold">
+                    Discount
+                  </th>
+
+                  <th className="p-6 font-semibold">
+                    Start Date
+                  </th>
+
+                  <th className="p-6 font-semibold">
+                    Expiry Date
+                  </th>
+
+                  <th className="p-6 font-semibold">
+                    Status
+                  </th>
+
+                  <th className="p-6 font-semibold">
+                    Actions
+                  </th>
                 </tr>
               </thead>
+
               <tbody>
-                {offers.map((offer) => (
-                  <tr key={offer.id} className="border-b border-[#f7f5ff] hover:bg-[#faf9ff] transition">
-                    <td className="p-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center">
-                          <Gift size={18} className="text-pink-600" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-[#1d1b4b]">{offer.title}</p>
-                          <p className="text-xs text-[#8a86b3]">{offer.discount} • {offer.type}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-6">
-                      <div className="flex items-center gap-2">
-                        <Store size={14} className="text-[#8a86b3]" />
-                        <span className="text-[#6f6c99]">{offer.shop}</span>
-                      </div>
-                    </td>
-                    <td className="p-6">
-                      <div className="space-y-1">
-                        <p className="text-sm text-[#6f6c99] flex items-center gap-1"><Calendar size={12} /> From: {offer.validFrom}</p>
-                        <p className="text-sm text-[#6f6c99]">To: {offer.validTo}</p>
-                      </div>
-                    </td>
-                    <td className="p-6">
-                      <code className="bg-gray-100 px-3 py-1 rounded-lg text-sm font-mono">{offer.code}</code>
-                    </td>
-                    <td className="p-6">
-                      <div>
-                        <p className="font-semibold text-[#1d1b4b]">{offer.usedCount} / {offer.limit}</p>
-                        <div className="w-24 h-1.5 bg-gray-200 rounded-full mt-1 overflow-hidden">
-                          <div className="h-full bg-green-500 rounded-full" style={{ width: `${(offer.usedCount / offer.limit) * 100}%` }}></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-6">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${offer.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {offer.status}
-                      </span>
-                    </td>
-                    <td className="p-6">
-                      <div className="flex gap-2">
-                        <button className="p-2 rounded-lg hover:bg-violet-50 text-violet-600"><Eye size={16} /></button>
-                        <button className="p-2 rounded-lg hover:bg-violet-50 text-violet-600"><Edit size={16} /></button>
-                        <button className="p-2 rounded-lg hover:bg-red-50 text-red-600"><Trash2 size={16} /></button>
-                      </div>
+                {/* EMPTY */}
+                {filteredOffers.length ===
+                  0 && (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="text-center py-10 text-[#8a86b3]"
+                    >
+                      No offers found
                     </td>
                   </tr>
-                ))}
+                )}
+
+                {/* ROWS */}
+                {paginatedOffers.map(
+                  (offer) => (
+                    <tr
+                      key={offer.id}
+                      className="border-b border-[#f7f5ff] hover:bg-[#faf9ff] transition"
+                    >
+                      {/* OFFER */}
+                      <td className="p-6">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={
+                              offer.offer_image
+                            }
+                            alt={
+                              offer.name
+                            }
+                            className="w-14 h-14 rounded-2xl object-cover"
+                          />
+
+                          <div>
+                            <h2 className="font-semibold text-[#1d1b4b]">
+                              {
+                                offer.name
+                              }
+                            </h2>
+
+                            <p className="text-sm text-[#8a86b3] mt-1">
+                              {
+                                offer.description
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* DISCOUNT */}
+                      <td className="p-6">
+                        <span className="bg-violet-100 text-violet-700 px-3 py-1 rounded-full text-sm font-bold">
+                          {
+                            offer.discount_value
+                          }
+
+                          {offer.discount_type ===
+                          "percentage"
+                            ? "%"
+                            : " Tk"}
+                        </span>
+                      </td>
+
+                      {/* START */}
+                      <td className="p-6 text-[#6f6c99]">
+                        <div className="flex items-center gap-2">
+                          <Calendar
+                            size={15}
+                          />
+
+                          {new Date(
+                            offer.start_date_time
+                          ).toLocaleDateString()}
+                        </div>
+                      </td>
+
+                      {/* EXPIRY */}
+                      <td className="p-6 text-[#6f6c99]">
+                        <div className="flex items-center gap-2">
+                          <Calendar
+                            size={15}
+                          />
+
+                          {new Date(
+                            offer.expiry_date
+                          ).toLocaleDateString()}
+                        </div>
+                      </td>
+
+                      {/* STATUS */}
+                      <td className="p-6">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            offer.is_active
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {offer.is_active
+                            ? "Active"
+                            : "Inactive"}
+                        </span>
+                      </td>
+
+                      {/* ACTIONS */}
+                      <td className="p-6">
+                        <div className="flex gap-2">
+                          <button className="p-2 rounded-lg hover:bg-violet-50 text-violet-600">
+                            <Eye size={16} />
+                          </button>
+
+                          <button className="p-2 rounded-lg hover:bg-violet-50 text-violet-600">
+                            <Edit size={16} />
+                          </button>
+
+                          <button className="p-2 rounded-lg hover:bg-red-50 text-red-600">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                )}
               </tbody>
             </table>
+
+            {/* PAGINATION */}
+            <div className="p-6 border-t border-[#f0ebff] flex items-center justify-between">
+              <p className="text-sm text-[#8a86b3]">
+                Showing{" "}
+                {filteredOffers.length ===
+                0
+                  ? 0
+                  : startIndex + 1}
+                -
+                {Math.min(
+                  endIndex,
+                  filteredOffers.length
+                )}{" "}
+                of{" "}
+                {
+                  filteredOffers.length
+                }{" "}
+                offers
+              </p>
+
+              <div className="flex items-center gap-2">
+                {/* PREVIOUS */}
+                <button
+                  disabled={
+                    currentPage === 1
+                  }
+                  onClick={() =>
+                    setCurrentPage(
+                      currentPage - 1
+                    )
+                  }
+                  className={`px-4 py-2 rounded-xl border transition ${
+                    currentPage === 1
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-violet-50"
+                  }`}
+                >
+                  Previous
+                </button>
+
+                {/* PAGE BUTTONS */}
+                {Array.from({
+                  length: totalPages,
+                }).map(
+                  (_, index) => (
+                    <button
+                      key={index}
+                      onClick={() =>
+                        setCurrentPage(
+                          index + 1
+                        )
+                      }
+                      className={`w-10 h-10 rounded-xl font-semibold transition ${
+                        currentPage ===
+                        index + 1
+                          ? "bg-violet-600 text-white"
+                          : "border hover:bg-violet-50"
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  )
+                )}
+
+                {/* NEXT */}
+                <button
+                  disabled={
+                    currentPage ===
+                    totalPages ||
+                    totalPages === 0
+                  }
+                  onClick={() =>
+                    setCurrentPage(
+                      currentPage + 1
+                    )
+                  }
+                  className={`px-4 py-2 rounded-xl border transition ${
+                    currentPage ===
+                      totalPages ||
+                    totalPages === 0
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-violet-50"
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </main>
-      <AddOfferModal isOpen={modalOpen === "offer"} onClose={() => setModalOpen(null)} />
+
+      <AddOfferModal
+        isOpen={
+          modalOpen === "offer"
+        }
+        onClose={() =>
+          setModalOpen(null)
+        }
+      />
     </div>
   );
 }

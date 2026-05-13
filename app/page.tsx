@@ -1,9 +1,10 @@
-// app/page.tsx
-
 "use client";
+
+import { useEffect } from "react";
 
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
+
 import StatCard from "@/components/StatCard";
 import OfferList from "@/components/OfferList";
 import UserTable from "@/components/UserTable";
@@ -18,55 +19,111 @@ import {
   Ticket,
 } from "lucide-react";
 
-import { useDataStore } from "@/store/dataStore";
+import { useShopStore } from "@/store/shopStore";
+import { useOfferStore } from "@/store/offerStore";
+import { useCustomerStore } from "@/store/customers";
+import { useRedemptionStore } from "@/store/redemptionStore";
 
 export default function DashboardPage() {
-  const shops = useDataStore(
-    (state) => state.shops
-  );
+  /* -----------------------------
+   STORES
+  ----------------------------- */
 
-  const customers = useDataStore(
-    (state) => state.customers
-  );
+  const {
+    shops,
+    fetchShops,
+  } = useShopStore();
 
-  const offers = useDataStore(
-    (state) => state.offers
-  );
+  const {
+    offers,
+    fetchOffers,
+  } = useOfferStore();
 
-  const redemptions = useDataStore(
-    (state) => state.redemptions
-  );
+  const {
+    customers,
+    fetchCustomers,
+  } = useCustomerStore();
+
+  const {
+    redemptions,
+    fetchRedemptions,
+  } = useRedemptionStore();
+
+  /* -----------------------------
+   FETCH DATA
+  ----------------------------- */
+
+  useEffect(() => {
+    fetchShops();
+
+    fetchOffers();
+
+    fetchCustomers();
+
+    fetchRedemptions();
+  }, []);
+
+  /* -----------------------------
+   STATS
+  ----------------------------- */
+
+  const completedRedemptions =
+    redemptions.filter(
+      (item) =>
+        item.status ===
+        "completed"
+    );
 
   const stats = [
     {
       title: "Total Shops",
-      value: shops.length.toString(),
+
+      value:
+        shops.length.toString(),
+
       change: "+12",
+
       color: "purple" as const,
+
       icon: <Store size={28} />,
     },
 
     {
       title: "Total Customers",
-      value: customers.length.toString(),
+
+      value:
+        customers.length.toString(),
+
       change: "+320",
+
       color: "blue" as const,
+
       icon: <Users size={28} />,
     },
 
     {
       title: "Total Offers",
-      value: offers.length.toString(),
+
+      value:
+        offers.length.toString(),
+
       change: "+8",
+
       color: "pink" as const,
+
       icon: <Gift size={28} />,
     },
 
     {
       title: "Daily Redemption",
-      value: redemptions.length.toString(),
+
+      value:
+        completedRedemptions.length.toString(),
+
       change: "+28",
+
       color: "green" as const,
+
       icon: <Ticket size={28} />,
     },
   ];
@@ -84,19 +141,26 @@ export default function DashboardPage() {
         <div className="mt-8">
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, idx) => (
-              <StatCard
-                key={idx}
-                {...stat}
-              />
-            ))}
+            {stats.map(
+              (stat, idx) => (
+                <StatCard
+                  key={idx}
+                  {...stat}
+                />
+              )
+            )}
           </div>
 
           {/* Middle Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Offers */}
             <div className="lg:col-span-1">
-              <OfferList />
+              <OfferList
+                offers={offers.slice(
+                  0,
+                  3
+                )}
+              />
             </div>
 
             {/* Users */}
